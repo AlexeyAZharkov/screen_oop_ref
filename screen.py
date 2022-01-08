@@ -16,15 +16,19 @@ class Vec2d:
 
     def __add__(self, other):
         """возвращает сумму двух векторов"""
+        print('add call')
         return self.x + other.x, self.y + other.y
 
     def __sub__(self, other):
         """"возвращает разность двух векторов"""
+        print('sub call')
         return self.x - other.x, self.y - other.y
 
     def __mul__(self, other):
         """возвращает произведение вектора на число"""
-        return self.x * other, self.y * other
+        print('mul call')
+        if isinstance(other, (int, float)):
+            return int(self.x * other), int(self.y * other)
 
     def len(self):
         """возвращает длину вектора"""
@@ -34,6 +38,39 @@ class Vec2d:
         """возвращает пару координат, определяющих вектор (координаты точки конца вектора),
         координаты начальной точки вектора совпадают с началом системы координат (0, 0)"""
         return int(other.x - self.x), int(other.y - self.y)
+
+
+class Polyline:
+    """ класс замкнутых ломаных c методами отвечающими за добавление в ломаную точки (Vec2d)
+    c её скоростью, пересчёт координат точек (set_points) и отрисовку ломаной (draw_points).
+    Арифметические действия с векторами должны быть реализованы
+    с помощью операторов, а не через вызовы соответствующих методов."""
+
+    def __init__(self):
+        self.points = []
+        self.speeds = []
+
+    def add_base_point(self):
+        """ метод отвечающими за добавление в ломаную точки (Vec2d) c её скоростью"""
+
+        pass
+
+    def set_points(self):
+        """ метод отвечающий за пересчёт координат точек"""
+        pass
+
+    def draw_points(self):
+        """ методами отвечающими за отрисовку ломаной (draw_points)"""
+        pass
+
+
+class Knot(Polyline):
+    """  в котором добавление и пересчёт координат инициируют
+    вызов функции get_knot для расчёта точек кривой по добавляемым «опорным» точкам"""
+
+    def get_knot(self):
+        """ функции get_knot для расчёта точек кривой по добавляемым «опорным» точкам"""
+        pass
 
 
 
@@ -115,7 +152,8 @@ def get_point(points, alpha, deg=None):
         deg = len(points) - 1
     if deg == 0:
         return points[0]
-    return add(mul(points[deg], alpha), mul(get_point(points, alpha, deg - 1), 1 - alpha))
+    # return add(mul(points[deg], alpha), mul(get_point(points, alpha, deg - 1), 1 - alpha))
+    return (points[deg] * alpha) + (get_point(points, alpha, deg - 1) * (1 - alpha))
 
 
 def get_points(base_points, count):
@@ -132,9 +170,12 @@ def get_knot(points, count):
     res = []
     for i in range(-2, len(points) - 2):
         ptn = []
-        ptn.append(mul(add(points[i], points[i + 1]), 0.5))
+        # print(points[i] * 2)
+        # ptn.append(mul(add(points[i], points[i + 1]), 0.5))
+        ptn.append((points[i] + points[i + 1]) * 0.5)
         ptn.append(points[i + 1])
-        ptn.append(mul(add(points[i + 1], points[i + 2]), 0.5))
+        # ptn.append(mul(add(points[i + 1], points[i + 2]), 0.5))
+        ptn.append((points[i + 1] + points[i + 2]) * 0.5)
 
         res.extend(get_points(ptn, count))
     return res
@@ -160,8 +201,9 @@ if __name__ == "__main__":
 
     steps = 35
     working = True
-    points = []
-    speeds = []
+    polyline = Polyline()
+    # points = []
+    # speeds = []
     show_help = False
     pause = True
 
@@ -188,10 +230,10 @@ if __name__ == "__main__":
                     steps -= 1 if steps > 1 else 0
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                point_o = Vec2d(event.pos)
-                points.append(point_o)
-                speed_o = Vec2d((random.random() * 2, random.random() * 2))
-                speeds.append(speed_o)
+                # point_o = Vec2d(event.pos)
+                polyline.add_base_point(event.pos)
+                # speed_o = Vec2d((random.random() * 2, random.random() * 2))
+                # polyline.speeds.append(speed_o)
 
         gameDisplay.fill((0, 0, 0))
         hue = (hue + 1) % 360
