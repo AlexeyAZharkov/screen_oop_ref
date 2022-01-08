@@ -16,8 +16,10 @@ class Vec2d:
 
     def __add__(self, other):
         """возвращает сумму двух векторов"""
-        print('add call')
-        return self.x + other.x, self.y + other.y
+        # print('add call')
+        self.x += other.x
+        self.y += other.y
+        return self
 
     def __sub__(self, other):
         """"возвращает разность двух векторов"""
@@ -26,9 +28,13 @@ class Vec2d:
 
     def __mul__(self, other):
         """возвращает произведение вектора на число"""
-        print('mul call')
+        # print('mul call')
         if isinstance(other, (int, float)):
             return int(self.x * other), int(self.y * other)
+        if isinstance(other, tuple):
+            self.x *= other[0]
+            self.y *= other[1]
+            return self
 
     def len(self):
         """возвращает длину вектора"""
@@ -50,18 +56,35 @@ class Polyline:
         self.points = []
         self.speeds = []
 
-    def add_base_point(self):
+    def add_base_point(self, new_vect, new_vect_speed):
         """ метод отвечающими за добавление в ломаную точки (Vec2d) c её скоростью"""
-
-        pass
+        self.points.append(new_vect)
+        self.speeds.append(new_vect_speed)
 
     def set_points(self):
         """ метод отвечающий за пересчёт координат точек"""
-        pass
+        """функция перерасчета координат опорных точек"""
+        for p in range(len(self.points)):
+            self.points[p] = self.points[p] + self.speeds[p]
+            if self.points[p].x > SCREEN_DIM[0] or self.points[p].x < 0:
+                self.speeds[p] = self.speeds[p] * (-1, 1)
+            if self.points[p].y > SCREEN_DIM[1] or self.points[p].y < 0:
+                self.speeds[p] = self.speeds[p] * (1, -1)
 
-    def draw_points(self):
-        """ методами отвечающими за отрисовку ломаной (draw_points)"""
-        pass
+    def draw_points(self, style="points", width=3, color=(255, 255, 255)):
+        """ метод отвечающими за отрисовку ломаной (draw_points)"""
+        """функция отрисовки точек на экране"""
+        if style == "line":
+            for p_n in range(-1, len(self.points) - 1):
+                pygame.draw.line(gameDisplay, color,
+                                 (int(self.points[p_n].x), int(self.points[p_n].y)),
+                                 (int(self.points[p_n + 1].x), int(self.points[p_n + 1].y)), width)
+
+        elif style == "points":
+            for p in self.points:
+                pygame.draw.circle(gameDisplay, color,
+                                   (int(p.x), int(p.y)), width)
+
 
 
 class Knot(Polyline):
@@ -230,18 +253,19 @@ if __name__ == "__main__":
                     steps -= 1 if steps > 1 else 0
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                # point_o = Vec2d(event.pos)
-                polyline.add_base_point(event.pos)
-                # speed_o = Vec2d((random.random() * 2, random.random() * 2))
+                point_o = Vec2d(event.pos)
+                speed_o = Vec2d((random.random() * 2, random.random() * 2))
+                polyline.add_base_point(point_o, speed_o)
                 # polyline.speeds.append(speed_o)
 
         gameDisplay.fill((0, 0, 0))
         hue = (hue + 1) % 360
         color.hsla = (hue, 100, 50, 100)
-        draw_points(points)
-        draw_points(get_knot(points, steps), "line", 3, color)
+        polyline.draw_points()
+        # draw_points(get_knot(points, steps), "line", 3, color)
+        polyline.draw_points(style="line")
         if not pause:
-            set_points(points, speeds)
+            polyline.set_points()
         if show_help:
             draw_help()
 
