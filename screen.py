@@ -15,13 +15,25 @@ class Vec2d:
         self.y = tupl[1]
 
     def __add__(self, other):
-        pass
+        """возвращает сумму двух векторов"""
+        return self.x + other.x, self.y + other.y
 
     def __sub__(self, other):
-        pass
+        """"возвращает разность двух векторов"""
+        return self.x - other.x, self.y - other.y
 
     def __mul__(self, other):
-        pass
+        """возвращает произведение вектора на число"""
+        return self.x * other, self.y * other
+
+    def len(self):
+        """возвращает длину вектора"""
+        return math.sqrt(self.x * self.x + self.y * self.y)
+
+    def int_pair(self, other):
+        """возвращает пару координат, определяющих вектор (координаты точки конца вектора),
+        координаты начальной точки вектора совпадают с началом системы координат (0, 0)"""
+        return int(other.x - self.x), int(other.y - self.y)
 
 
 
@@ -178,7 +190,8 @@ if __name__ == "__main__":
             if event.type == pygame.MOUSEBUTTONDOWN:
                 point_o = Vec2d(event.pos)
                 points.append(point_o)
-                speeds.append((random.random() * 2, random.random() * 2))
+                speed_o = Vec2d((random.random() * 2, random.random() * 2))
+                speeds.append(speed_o)
 
         gameDisplay.fill((0, 0, 0))
         hue = (hue + 1) % 360
